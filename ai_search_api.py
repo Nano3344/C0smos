@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
+from google.oauth2.service_account import Credentials
+import json
 import gspread
 import pandas as pd
 import os
@@ -23,7 +25,15 @@ GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ✅ Load resources from Google Sheets
-gc = gspread.service_account(filename=GOOGLE_CREDENTIALS_FILE)
+google_json = os.getenv("GOOGLE_JSON")
+info = json.loads(google_json)
+
+creds = Credentials.from_service_account_info(info, scopes=[
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+])
+
+gc = gspread.authorize(creds)
 sheet = gc.open("C0smos - AI Resources").sheet1
 data = sheet.get_all_values()
 df = pd.DataFrame(data[1:], columns=data[0])
