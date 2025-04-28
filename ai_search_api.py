@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 from google.oauth2.service_account import Credentials
+import base64
 import json
 import gspread
 import pandas as pd
@@ -25,7 +26,8 @@ GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ✅ Load resources from Google Sheets
-google_json = os.getenv("GOOGLE_JSON")
+google_json_base64 = os.getenv("GOOGLE_JSON_BASE64")
+google_json = base64.b64decode(google_json_base64).decode('utf-8')
 info = json.loads(google_json)
 
 creds = Credentials.from_service_account_info(info, scopes=[
