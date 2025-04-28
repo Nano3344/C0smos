@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 import gspread
 import pandas as pd
@@ -7,6 +8,13 @@ import os
 import re
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://www.c0smos.com"],  # ✅ Only allow your frontend
+    allow_methods=["POST"],  # You only need POST
+    allow_headers=["*"],
+)
 
 # ✅ Setup your environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
