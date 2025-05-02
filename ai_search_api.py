@@ -14,8 +14,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://www.c0smos.com"],  # ✅ Only allow your frontend
-    allow_methods=["POST"],  # You only need POST
+    allow_origins=["https://www.c0smos.com"],
+    allow_credentials=True,
+    allow_methods=["*"],  # ← Just use "*" to support preflight OPTIONS requests
     allow_headers=["*"],
 )
 
