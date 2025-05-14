@@ -9,6 +9,8 @@ import gspread
 import pandas as pd
 import os
 import re
+from fastapi.responses import StreamingResponse
+import asyncio
 
 app = FastAPI()
 
@@ -73,7 +75,7 @@ def generate_response(question, resources):
     )
 
     prompt = f"""
-You are a UX/Product assistant. Answer the user's question thoughtfully, and recommend relevant resources.
+You are the best UX/Product Expert in the world. Answer the user's question thoughtfully, and recommend relevant resources.
 
 Question: {question}
 
@@ -103,29 +105,39 @@ async def ai_search(request: Request):
     question = body.get("question")
 
     relevant_resources = filter_relevant_resources(question, df)
-    gpt_response = generate_response(question, relevant_resources)
+    resource_list = "\n".join(
+        [f"- {row['Headline']} → {row['Button']}" for row in relevant_resources]
+    )
 
-    # ✅ Now split the GPT output properly
-    answer = ""
-    recommended_resources = []
+    prompt = f"""
+You are the best UX/Product Expert in the world. Answer the user's question thoughtfully, and recommend relevant resources.
 
-    # Separate the sections cleanly
-    if "Answer:" in gpt_response and "Recommended Resources:" in gpt_response:
-        answer_part = gpt_response.split("Answer:")[1].split("Recommended Resources:")[0].strip()
-        resources_part = gpt_response.split("Recommended Resources:")[1].strip()
+Question: {question}
 
-        answer = answer_part
-        lines = resources_part.split("\n")
-        for line in lines:
-            if " - " in line:
-                title, link = line.split(" - ", 1)
-                recommended_resources.append({
-                    "title": title.strip("0123456789. ").strip(),
-                    "link": link.strip()
-                })
+Resources:
+{resource_list}
 
-    return JSONResponse(content={
-        "answer": answer,
-        "resources": recommended_resources
-    })
+Format:
+Answer: [your thoughtful answer here]
+
+Recommended Resources:
+1. [Title] - [Link]
+2. [Title] - [Link]
+"""
+
+    async def stream_response():
+        completion = client.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=800,
+            stream=True
+        )
+
+        async for chunk in completion:
+            delta = chunk.choices[0].delta
+            if hasattr(delta, "content") and delta.content:
+                yield delta.content
+            await asyncio.sleep(0.001)  # helps keep it smooth
+
+    return StreamingResponse(stream_response(), media_type="text/plain")
 
