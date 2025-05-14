@@ -125,19 +125,18 @@ Recommended Resources:
 2. [Title] - [Link]
 """
 
-    async def stream_response():
-        completion = client.chat.completions.create(
+    def generate_chunks():
+        response = client.chat.completions.create(
             model="gpt-4-1106-preview",
             messages=[{"role": "user", "content": prompt}],
+            stream=True,
             max_tokens=800,
-            stream=True
         )
-
-        async for chunk in completion:
+        for chunk in response:
             delta = chunk.choices[0].delta
             if hasattr(delta, "content") and delta.content:
                 yield delta.content
-            await asyncio.sleep(0.001)  # helps keep it smooth
 
-    return StreamingResponse(stream_response(), media_type="text/plain")
+    return StreamingResponse(generate_chunks(), media_type="text/plain")
+
 
