@@ -109,6 +109,7 @@ async def ai_search(request: Request):
         [f"- {row['Headline']} → {row['Button']}" for row in relevant_resources]
     )
 
+
     prompt = f"""
 You are the best UX/Product Expert in the world. Answer the user's question thoughtfully, and recommend relevant resources.
 
@@ -138,5 +139,25 @@ Recommended Resources:
                 yield delta.content
 
     return StreamingResponse(generate_chunks(), media_type="text/plain")
+
+
+@app.post("/ai-search-resources")
+async def ai_search_resources(request: Request):
+    body = await request.json()
+    question = body.get("question")
+
+    relevant_resources = filter_relevant_resources(question, df)
+
+    formatted_resources = []
+    for row in relevant_resources[:5]:
+        formatted_resources.append({
+            "title": row.get("Headline", "").strip(),
+            "link": row.get("Button", "").strip(),
+            "category": row.get("Category", "").strip(),
+            "author": row.get("Author", "").strip()
+        })
+
+    return JSONResponse(content={"resources": formatted_resources})
+
 
 
