@@ -111,7 +111,7 @@ async def ai_search(request: Request):
 
 
     prompt = f"""
-You are the best UX/Product Expert in the world. Answer the user's question thoughtfully, and recommend relevant resources.
+You are the best UX/Product Expert in the world. Answer the user's question thoughtfully in HTML. Use <ul>, <li>, <strong>, and <br> for clean formatting. Recommend relevant resources at the end.
 
 Question: {question}
 
@@ -119,7 +119,7 @@ Resources:
 {resource_list}
 
 Format:
-Answer: [your thoughtful answer here]
+Answer: [HTML formatted answer]
 
 Recommended Resources:
 1. [Title] - [Link]
