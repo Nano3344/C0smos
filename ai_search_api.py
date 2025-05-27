@@ -111,7 +111,7 @@ async def ai_search(request: Request):
 
 
     prompt = f"""
-You are the best UX/Product Expert in the world. Answer the user's question thoughtfully in HTML. Use a balance of <p>, <ul>, <li>, <strong>, and <br> for clean formatting. Recommend relevant resources at the end.
+You are the best UX/Product Expert in the world. Answer the user's question thoughtfully & as detailed as possible in HTML. Use a balance of <p>, <ul>, <li>, <strong>, and <br> for clean formatting. Recommend relevant resources at the end.
 
 Do NOT use markdown syntax like ```html in your response. I repeat, DO NOT USE IT.
 
